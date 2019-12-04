@@ -226,7 +226,7 @@ class Development(Common):
 
     REDIRECT_HOSTS = ['localhost', '127.0.0.1']
 
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_HOST = values.Value('localhost', environ_prefix='KUBEPORTAL')
 
 

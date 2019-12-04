@@ -10,6 +10,7 @@ from .token import FernetToken, InvalidToken
 import logging
 
 from kubeportal.models import Link, UserState, User
+from kubeportal.kubernetes import get_services
 
 logger = logging.getLogger('KubePortal')
 
@@ -131,3 +132,18 @@ class ConfigView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         Allow config view only if a K8S service account is set.
         '''
         return self.request.user.service_account is not None
+
+
+class IngressView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = "portal_ingress.html"
+
+    def test_func(self):
+        '''
+        Allow config view only if a K8S service account is set.
+        '''
+        return self.request.user.service_account is not None
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['service_list'] = get_services()
+        return context

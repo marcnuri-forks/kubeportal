@@ -276,3 +276,10 @@ def get_token(kubeportal_service_account):
         name=secret_name, namespace=kubeportal_service_account.namespace.name)
     encoded_token = secret.data['token']
     return b64decode(encoded_token).decode()
+
+
+def get_services(kubeportal_service_account):
+    k8s_svc_list = v1.list_namespaced_service(
+        namespace=kubeportal_service_account.namespace.name
+    )
+    return k8s_svc_list.items
