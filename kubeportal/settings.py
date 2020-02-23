@@ -6,6 +6,7 @@ from kubeportal.secret import get_secret_key
 
 class Common(Configuration):
     VERSION = '0.2.7'
+    SITE_ID = 1
 
     SECRET_KEY = get_secret_key()
 
@@ -20,6 +21,18 @@ class Common(Configuration):
         'social_django',
         'rest_framework',
         'rest_framework.authtoken',
+        # Django wiki dependencies
+        'django.contrib.sites.apps.SitesConfig',
+        'django.contrib.humanize.apps.HumanizeConfig',
+        'django_nyt.apps.DjangoNytConfig',
+        'mptt',
+        'sekizai',
+        'sorl.thumbnail',
+        'wiki.apps.WikiConfig',
+        'wiki.plugins.attachments.apps.AttachmentsConfig',
+        'wiki.plugins.notifications.apps.NotificationsConfig',
+        'wiki.plugins.images.apps.ImagesConfig',
+        'wiki.plugins.macros.apps.MacrosConfig',
         'kubeportal',
     ]
 
@@ -48,6 +61,7 @@ class Common(Configuration):
                     'django.template.context_processors.request',
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
+                    'sekizai.context_processors.sekizai',
                     'social_django.context_processors.backends',
                     'social_django.context_processors.login_redirect',
                 ],
@@ -223,6 +237,8 @@ class Common(Configuration):
     ADMIN_NAME = values.Value(environ_prefix='KUBEPORTAL')
     ADMIN_EMAIL = values.Value(environ_prefix='KUBEPORTAL')
     ADMINS = [(ADMIN_NAME, ADMIN_EMAIL), ]
+
+    WIKI_ACCOUNT_HANDLING = False
 
 class Development(Common):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

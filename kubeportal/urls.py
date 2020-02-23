@@ -25,5 +25,7 @@ urlpatterns = [
     path('admin/', admin_site.urls),
     # Note: The OpenID Connect URL is /oidc/authorize
     path('oidc/', include('oidc_provider.urls', namespace='oidc_provider')),
-    path('api/', include(router.urls), name='api')
+    path('api/', include(router.urls), name='api'),
+    path('notifications/', include('django_nyt.urls')),
+    path('docs/', include('wiki.urls'))
 ]
