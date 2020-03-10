@@ -3,6 +3,8 @@ from configurations import Configuration, values
 
 from kubeportal.secret import get_secret_key
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class Common(Configuration):
     VERSION = '0.2.7'
@@ -21,6 +23,8 @@ class Common(Configuration):
         'social_django',
         'rest_framework',
         'rest_framework.authtoken',
+        # Put us here to allow wiki template overriding
+        'kubeportal',
         # Django wiki dependencies
         'django.contrib.sites.apps.SitesConfig',
         'django.contrib.humanize.apps.HumanizeConfig',
@@ -33,7 +37,6 @@ class Common(Configuration):
         'wiki.plugins.notifications.apps.NotificationsConfig',
         'wiki.plugins.images.apps.ImagesConfig',
         'wiki.plugins.macros.apps.MacrosConfig',
-        'kubeportal',
     ]
 
     MIDDLEWARE = [

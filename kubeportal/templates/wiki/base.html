@@ -1,0 +1,17 @@
+{% extends 'portal_base.html' %}
+{% load sekizai_tags i18n wiki_tags static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'wiki/wiki.css' %}">
+{% endblock %}
+
+{% block portal_content %}
+      {% wiki_messages %}
+
+      <!-- Reserved for breadcrumbs -->
+      {% block wiki_breadcrumbs %}{% endblock %}
+
+      <!-- Main page contents go here -->
+      {% block wiki_contents %}{% endblock %}
+
+{% endblock %}

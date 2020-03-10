@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
 import oidc_provider
 import logging
+import wiki
 from . import models
 from kubeportal.kubernetes import sync
 
@@ -213,3 +214,6 @@ admin_site.register(models.KubernetesNamespace, KubernetesNamespaceAdmin)
 admin_site.register(models.Link)
 admin_site.register(oidc_provider.models.Client)
 admin_site.register(oidc_provider.models.UserConsent)
+admin_site.register(wiki.models.Article)
+admin_site.register(wiki.models.URLPath)
+admin_site.register(wiki.models.ArticleRevision)
