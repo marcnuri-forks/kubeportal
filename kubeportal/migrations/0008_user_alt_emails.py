@@ -7,7 +7,7 @@ import multi_email_field.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('kubeportal', '0005_auto_20200401_1045'),
+        ('kubeportal', '0007_auto_20200411_1458'),
     ]
 
     operations = [
