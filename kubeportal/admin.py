@@ -10,6 +10,8 @@ from django.contrib.auth import get_user_model
 from django.template.response import TemplateResponse
 from oidc_provider.models import Client
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+from markdownx.admin import MarkdownxModelAdmin
+
 import logging
 import uuid
 from . import models
@@ -505,3 +507,4 @@ admin_site.register(models.KubernetesServiceAccount,
 admin_site.register(models.KubernetesNamespace, KubernetesNamespaceAdmin)
 admin_site.register(models.WebApplication, WebApplicationAdmin)
 admin_site.register(Client, OidcClientAdmin)
+admin_site.register(models.WelcomeMessage, MarkdownxModelAdmin)

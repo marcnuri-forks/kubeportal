@@ -22,6 +22,7 @@ class Common(Configuration):
         'rest_framework',
         'rest_framework.authtoken',
         'multi_email_field',
+        'markdownx',
         'kubeportal',
     ]
 

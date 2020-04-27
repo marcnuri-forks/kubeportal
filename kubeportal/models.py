@@ -9,10 +9,13 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags, mark_safe
 from oidc_provider.models import Client
 from multi_email_field.fields import MultiEmailField
+from markdownx.models import MarkdownxField
+
 import uuid
 import logging
 
 logger = logging.getLogger('KubePortal')
+
 
 
 class KubernetesNamespace(models.Model):
@@ -117,6 +120,21 @@ class PortalGroup(models.Model):
 
     class Meta:
         verbose_name = "User Group"
+
+
+class WelcomeMessage(models.Model):
+    '''
+    Message of the day, shown on the welcome screen.
+    '''
+    text = MarkdownxField(
+        help_text="The message as Markdown text, see https://www.markdownguide.org/cheat-sheet/ for syntax hints.")
+    portal_groups = models.ManyToManyField(
+        PortalGroup, 
+        blank=True, 
+        verbose_name='Groups', 
+        help_text="The user groups this message is shown for.", 
+        related_name='motd')
+
 
 
 class UserState():

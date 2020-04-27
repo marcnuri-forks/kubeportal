@@ -2,6 +2,7 @@ from django.contrib.auth.views import LogoutView
 from django.conf.urls import include, url
 from django.urls import path
 from oidc_provider.views import ProviderInfoView
+from markdownx import urls as markdownx
 
 from kubeportal import views
 from kubeportal.admin import admin_site
@@ -28,5 +29,6 @@ urlpatterns = [
     # Note: The OpenID Connect URL is /oidc/authorize
     path('oidc/', include('oidc_provider.urls', namespace='oidc_provider')),
     path('.well-known/openid-configuration', ProviderInfoView.as_view(), name='provider_info'),
-    path('api/', include(router.urls), name='api')
+    path('api/', include(router.urls), name='api'),
+    path('markdownx/', include(markdownx))
 ]
