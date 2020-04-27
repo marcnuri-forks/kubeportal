@@ -73,7 +73,7 @@ def alt_mails(strategy, user, is_new=False, *args, details, backend, **kwargs):
     if current_user:
         # strip unix prefixes of normal email addresses
         # unix:user@domain.tld -> user@domain.tld
-        details['alt_mails'] = [i.lower().replace("unix:", "") for i in details['alt_mails']]
+        details['alt_mails'] = [i.lower().replace("unix:", "").replace("smtp:", "") for i in details['alt_mails']]
         current_user.alt_mails = details['alt_mails']
         logger.info("Updated alternative email addresses of user \"{}\""
                     .format(details['fullname']))
