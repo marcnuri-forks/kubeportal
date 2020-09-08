@@ -3,7 +3,7 @@ from rest_framework.test import RequestsClient
 from kubeportal.tests import AdminLoggedOutTestCase, admin_data, admin_clear_password
 from kubeportal.api.views import StatisticsView
 from kubeportal.settings import API_VERSION
-from kubeportal.models import WebApplication
+from kubeportal.models import PortalGroup, WebApplication
 
 
 class ApiTestCase(AdminLoggedOutTestCase):
@@ -84,6 +84,10 @@ class ApiLocalUser(ApiTestCase):
     def setUp(self):
         super().setUp()
         self.api_login()
+        self.app1 = WebApplication(name="app1", link_show=True, link_name="app1", link_url="http://www.heise.de")
+        self.app1.save()
+        self.app2 = WebApplication(name="app2", link_show=True, link_name="app2", link_url="http://www.spiegel.de")
+        self.app2.save()
 
 
     def test_stats(self):
@@ -96,26 +100,17 @@ class ApiLocalUser(ApiTestCase):
                 self.assertIsNotNone(data['value'])
 
     def test_webapps(self):
-        app1 = WebApplication(name="app1", link_show=True, link_name="app1", link_url="http://www.heise.de")
-        app1.save()
-        app2 = WebApplication(name="app2", link_show=True, link_name="app2", link_url="http://www.spiegel.de")
-        app2.save()
         response = self.get(F'/api/{API_VERSION}/webapps/')
         self.assertEquals(response.status_code, 200)
         data = response.json()
-        self.assertEquals(data[0]['link_name'], 'app1')
-        self.assertEquals(data[1]['link_name'], 'app2')
-        self.assertEquals(data[0]['link_url'], 'http://www.heise.de')
-        self.assertEquals(data[1]['link_url'], 'http://www.spiegel.de')
+        self.assertEquals(data[0]['link_name'], self.app1.name)
+        self.assertEquals(data[1]['link_name'], self.app2.name)
+        self.assertEquals(data[0]['link_url'], self.app1.link_url)
+        self.assertEquals(data[1]['link_url'], self.app2.link_url)
 
     def test_user(self):
-        app1 = WebApplication(name="app1", link_show=True, link_name="app1", link_url="http://www.heise.de")
-        app1.save()
-        app2 = WebApplication(name="app2", link_show=True, link_name="app2", link_url="http://www.spiegel.de")
-        app2.save()
 
         expected = [
-            'id', 
             'firstname', 
             'name', 
             'username', 
@@ -134,8 +129,11 @@ class ApiLocalUser(ApiTestCase):
         self.assertEquals(response.status_code, 200)
         data = response.json()
 
-        self.assertIn(app1.pk, data['portal_groups'])
-        self.assertIn(app2.pk, data['portal_groups'])
+        # Check portal groups for validity
+        for pk in data['portal_groups']:
+            self.assertIsNotNone(PortalGroup.objects.get(pk=pk))
+
+        # Check admin flag for validity
         self.assertIs(True, data['admin'])
 
         for key in expected:

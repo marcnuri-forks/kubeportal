@@ -2,6 +2,7 @@ from dj_rest_auth import serializers as dj_serializers
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from kubeportal.models import WebApplication
+from rest_flex_fields import FlexFieldsModelSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,6 +35,9 @@ class WebApplicationSerializer(serializers.ModelSerializer):
 
 
 class UserDetailsSerializer(dj_serializers.UserDetailsSerializer):
+    '''
+    Used for rendering the /login response body.
+    '''
     uid = serializers.CharField(source='pk', read_only=True)
 
     class Meta:
