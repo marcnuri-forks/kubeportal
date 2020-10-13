@@ -3,7 +3,7 @@ from kubernetes import client
 import logging
 
 from kubeportal.models.kubernetesnamespace import KubernetesNamespace
-from kubeportal.k8s.kubernetes_api import core_v1
+from kubeportal.k8s.api import core_v1
 
 
 logger = logging.getLogger('KubePortal')

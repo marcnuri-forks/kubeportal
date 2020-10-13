@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from kubeportal.models.webapplication import WebApplication
-from .k8s import kubernetes_api as api
+from .k8s import api as api
 
 import logging
 
@@ -32,7 +32,7 @@ class StatsView(LoginRequiredMixin, TemplateView):
             context['k8sversion'] = api.get_kubernetes_version()
             context['apiserver'] = api.get_apiserver()
             context['numberofnodes'] = api.get_number_of_nodes()
-            context['cpusum'] = api.get_number_of_cpus()
+            context['cpusum'] = api.get_number_of_cpu_cores()
             context['memsum'] = api.get_memory_sum()
             context['numberofpods'] = api.get_number_of_pods()
             context['numberofvolumes'] = api.get_number_of_volumes()

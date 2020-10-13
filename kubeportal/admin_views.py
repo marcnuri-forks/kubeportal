@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from kubeportal.models.kubernetesnamespace import KubernetesNamespace
 from kubeportal.models import User
-from .k8s import k8s_sync
+from .k8s import sync
 
 import logging
 
@@ -14,7 +14,7 @@ logger = logging.getLogger('KubePortal')
 
 
 def sync_view(request):
-    k8s_sync.sync(request)
+    sync.sync(request)
     return redirect('admin:index')
 
 

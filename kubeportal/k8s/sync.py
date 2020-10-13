@@ -1,4 +1,4 @@
-'''
+"""
     Synchronization between Kubernetes API server and portal data
 
     The API server is the master data source, the portal just mirrors it.
@@ -8,7 +8,7 @@
     Kubeportal will never delete resources in Kubernetes, so there is no code
     and no UI for that. Admins should perform deletion operation directly
     in Kubernetes, e.g. through kubectl, and sync KubePortal afterwards.
-'''
+"""
 
 from django.contrib import messages
 from kubernetes import client
@@ -17,7 +17,7 @@ from kubeportal.models.kubernetesserviceaccount import KubernetesServiceAccount
 from kubeportal.k8s.utils import load_config, error_log
 from kubeportal.k8s import ns_sync_utils as ns_utils
 from kubeportal.k8s import svca_sync_utils as svca_utils
-from kubeportal.k8s import kubernetes_api as api
+from kubeportal.k8s import api as api
 
 import json
 import logging
@@ -25,12 +25,14 @@ import logging
 
 logger = logging.getLogger('KubePortal')
 
-core_v1, rbac_v1 = load_config()
 
 k8s_ns_uids = []
 
 
 def _sync_namespaces(request):
+    """
+    Synchronize namespaces known to Kubernetes, and namespaces known to the portal.
+    """
     #################################################
     # K8S namespaces -> portal namespaces
     #################################################
@@ -40,7 +42,7 @@ def _sync_namespaces(request):
     try:
         k8s_ns_list = api.get_namespaces()
     except Exception as e:
-        error_log(request, e, None, 'Sync failed, error while fetching list of namespaces: {e}')
+        error_log(request, f'Sync failed, error while fetching list of namespaces: {e}')
         return
 
     for k8s_ns in k8s_ns_list:
@@ -57,7 +59,7 @@ def _sync_namespaces(request):
                 logger.debug(f"Found existing record for Kubernetes namespace '{k8s_ns_name}'")
                 success_count_pull += 1
         except Exception as e:
-            error_log(request, e, k8s_ns.metadata.name, 'Sync from Kubernetes for namespace {} failed: {}.')
+            error_log(request, f'Sync from Kubernetes for namespace {k8s_ns.metadata.name} failed: {e}.')
 
     #################################################
     # portal namespaces -> K8S namespaces
@@ -71,7 +73,7 @@ def _sync_namespaces(request):
                 # Portal namespaces without UID are new and should be created in K8S
                 ns_utils.add_namespace_to_kubernetes(portal_ns, request, api)
         except Exception as e:
-            error_log(request, e, portal_ns, 'Sync to Kubernetes for namespace {} failed: {}."')
+            error_log(request, f'Sync to Kubernetes for namespace {portal_ns} failed: {e}."')
 
     if success_count_push == success_count_pull:
         messages.success(request, "All valid namespaces are in sync.")
@@ -80,6 +82,9 @@ def _sync_namespaces(request):
 
 
 def _sync_svcaccounts(request):
+    """
+    Synchronize service accounts known to Kubernetes, and service accounts known to the portal.
+    """
     #################################################
     # K8S svc accounts -> portal svc accounts
     #################################################
@@ -91,7 +96,7 @@ def _sync_svcaccounts(request):
     try:
         k8s_svca_list = api.get_service_accounts()
     except Exception as e:
-        error_log(request, e, None, "Sync failed, error while fetching list of service accounts: {}.")
+        error_log(request, "Sync failed, error while fetching list of service accounts: {e}.")
         return
 
     for k8s_svca in k8s_svca_list:
@@ -115,7 +120,7 @@ def _sync_svcaccounts(request):
                     k8s_svca.metadata.namespace, k8s_svca.metadata.name))
                 success_count_pull += 1
         except Exception as e:
-            error_log(request, e, k8s_svca.metadata.name, 'Sync from Kubernetes for service account {} failed: {}."')
+            error_log(request, 'Sync from Kubernetes for service account {k8s_svca.metadata.name} failed: {e}."')
 
     if len(ignored_missing_ns) > 0:
         names = ["{0}:{1}".format(a, b)
@@ -149,25 +154,25 @@ def _sync_svcaccounts(request):
                 # Portal service accounts without UID are new and should be created in K8S
                 svca_utils.add_svca_to_kubernetes(request, portal_svca, portal_ns)
         except Exception as e:
-            error_log(request, e, portal_svca.namespace, 'Sync to Kubernetes for service account {} failed: {}.')
+            error_log(request, 'Sync to Kubernetes for service account {portal_svca.namespace} failed: {e}.')
 
     if success_count_push == success_count_pull:
         messages.success(request, "All valid service accounts are in sync.")
 
 
 def sync(request):
-    '''
-    Synchronizes the local shallow copy of Kubernetes data.
+    """
+    Synchronizes the Kubernetes knowledge of the portal with the given cluster.
+    Namespaces must be synched first, so that the new service accounts of new namespaces
+    are considered in the same execution run of this method.
+
     Returns True on success.
-    '''
+    """
     try:
         _sync_namespaces(request)
         _sync_svcaccounts(request)
         return True
     except client.rest.ApiException as e:
         msg = json.loads(e.body)['message']
-        logger.error(
-            "API server exception during synchronization: {0}".format(msg))
-        messages.error(
-            request, "Kubernetes returned an error during synchronization: {0}".format(msg))
+        error_log(request, f"Kubernetes returned an error during synchronization: {msg}")
         return False

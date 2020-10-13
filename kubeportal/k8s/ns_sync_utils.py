@@ -4,7 +4,7 @@ from django.contrib import messages
 from kubeportal.models.kubernetesnamespace import KubernetesNamespace
 from kubernetes import client
 from kubeportal.k8s.utils import error_log
-from kubeportal.k8s.kubernetes_api import rbac_v1
+from kubeportal.k8s.api import rbac_v1
 import logging
 import re
 

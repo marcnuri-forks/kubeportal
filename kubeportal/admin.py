@@ -14,7 +14,7 @@ from kubeportal.models import UserState as states
 import logging
 import uuid
 from . import models, admin_views
-from .k8s import k8s_sync, kubernetes_api as api
+from .k8s import sync, api as api
 from .models.kubernetesnamespace import KubernetesNamespace
 from .models.kubernetesserviceaccount import KubernetesServiceAccount
 from .models.portalgroup import PortalGroup
@@ -58,7 +58,7 @@ class KubernetesServiceAccountAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        k8s_sync.sync(request)
+        sync.sync(request)
 
     def get_queryset(self, request):
         '''
@@ -191,13 +191,7 @@ class KubernetesNamespaceAdmin(admin.ModelAdmin):
         return ','.join(User.objects.filter(service_account__namespace=instance).values_list('username', flat=True))
 
     def created(self, instance):
-        if not self.ns_list:
-            self.ns_list = api.get_namespaces()
-
-        for ns in self.ns_list:
-            if ns.metadata.name == instance.name:
-                return ns.metadata.creation_timestamp
-        return None
+        return api.get_namespace(instance.name).metadata.creation_timestamp
     created.short_description = "Created in Kubernetes"
 
     def number_of_pods(self, instance):
@@ -245,7 +239,7 @@ class KubernetesNamespaceAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        k8s_sync.sync(request)
+        sync.sync(request)
 
     def get_queryset(self, request):
         '''
@@ -496,7 +490,7 @@ class PortalUserAdmin(UserAdmin):
                     name=request.POST['approve_create_name'])
                 new_ns.save()
                 # creates "default" service account automatically
-                if k8s_sync.sync(request):
+                if sync.sync(request):
                     new_svc = get_object_or_404(
                         KubernetesServiceAccount, namespace=new_ns, name="default")
                     if user.approve(request, new_svc):

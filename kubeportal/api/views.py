@@ -11,7 +11,7 @@ from kubeportal.api.serializers import UserSerializer, WebApplicationSerializer,
 from django.conf import settings
 from kubeportal.models.portalgroup import PortalGroup
 from kubeportal.models.webapplication import WebApplication
-from kubeportal.k8s import kubernetes_api as api
+from kubeportal.k8s import api as api
 
 import logging
 
@@ -145,7 +145,7 @@ class ClusterViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     stats = {'k8s_version': api.get_kubernetes_version,
              'k8s_apiserver_url': api.get_apiserver,
              'k8s_node_count': api.get_number_of_nodes,
-             'k8s_cpu_count': api.get_number_of_cpus,
+             'k8s_cpu_count': api.get_number_of_cpu_cores,
              'k8s_mem_sum': api.get_memory_sum,
              'k8s_pod_count': api.get_number_of_pods,
              'k8s_volume_count': api.get_number_of_volumes,

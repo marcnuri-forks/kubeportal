@@ -13,7 +13,7 @@ from kubeportal.models import UserState
 from kubeportal.tests import AdminLoggedInTestCase
 from unittest.mock import patch
 from kubeportal.admin import merge_users, UserAdmin
-from kubeportal.k8s import k8s_sync, kubernetes_api as api
+from kubeportal.k8s import sync, api as api
 from kubeportal.admin_views import prune
 
 
@@ -48,7 +48,7 @@ class Backend(AdminLoggedInTestCase):
         # We are calling the sync method directly here, and not through the view,
         # so that the result of sync is directly analyzed
         request = self._build_full_request_mock('admin:index')
-        sync_success = k8s_sync.sync(request)
+        sync_success = sync.sync(request)
         self.assertEqual(sync_success, expect_success)
 
     def setUp(self):
