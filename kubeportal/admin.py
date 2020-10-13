@@ -31,10 +31,10 @@ class CustomAdminSite(admin.AdminSite):
     def get_urls(self):
         urls = super().get_urls()
         urls += [
-                path('cleanup/', admin_views.CleanupView.as_view(), name='cleanup'),
-                path('sync/', admin_views.sync_view, name='sync'),
-                path('prune/', admin_views.prune, name='prune')
-                ]
+            path('cleanup/', admin_views.CleanupView.as_view(), name='cleanup'),
+            path('sync/', admin_views.sync_view, name='sync'),
+            path('prune/', admin_views.prune, name='prune')
+        ]
         return urls
 
 
@@ -163,18 +163,22 @@ class WebApplicationAdmin(admin.ModelAdmin):
             html_list.append(format_html(
                 '<a href="{}">{}</a>', group_url, group.name))
         return format_html(', '.join(html_list))
+
     portal_group_list.short_description = "Allowed for"
 
     def client_id(self, instance):
         return instance.oidc_client.client_id if instance.oidc_client else ""
+
     client_id.short_description = "OIDC Client ID"
 
     def client_secret(self, instance):
         return instance.oidc_client.client_secret if instance.oidc_client else ""
+
     client_secret.short_description = "OIDC Client Secret"
 
     def client_redirect_uris(self, instance):
         return ', '.join(instance.oidc_client.redirect_uris) if instance.oidc_client else ""
+
     client_redirect_uris.short_description = "OIDC Redirect Targets"
 
 
@@ -183,25 +187,27 @@ class KubernetesNamespaceAdmin(admin.ModelAdmin):
                     'portal_users', 'created', 'number_of_pods']
     list_display_links = None
     list_filter = ['visible']
-    ns_list = None
     pod_list = None
     actions = [make_visible, make_invisible]
 
-    def portal_users(self, instance):
+    @staticmethod
+    def portal_users(instance):
         return ','.join(User.objects.filter(service_account__namespace=instance).values_list('username', flat=True))
 
     def created(self, instance):
-        return api.get_namespace(instance.name).metadata.creation_timestamp
+        try:
+            return api.get_namespace(instance.name).metadata.creation_timestamp
+        except Exception:
+            return "---"
+
     created.short_description = "Created in Kubernetes"
 
     def number_of_pods(self, instance):
-        if not self.pod_list:
-            self.pod_list = api.get_pods()
-        count = 0
-        for pod in self.pod_list:
-            if pod.metadata.namespace == instance.name:
-                count += 1
-        return count
+        try:
+            return api.get_number_of_pods()
+        except Exception:
+            return -1
+
     number_of_pods.short_description = "Number of pods"
 
     def has_change_permission(self, request, obj=None):
@@ -294,13 +300,13 @@ class PortalGroupAdmin(admin.ModelAdmin):
 
     In case something goes wrong, the superuser still has full edit rights.
     '''
-    form = PortalGroupAdminForm     # implement reverse member management
+    form = PortalGroupAdminForm  # implement reverse member management
 
     list_display = ('name', 'members_list', 'can_admin', 'app_list')
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            if obj.is_special_group()  and not request.user.is_superuser:
+            if obj.is_special_group() and not request.user.is_superuser:
                 return ('name', 'members')
         return ()
 
@@ -317,7 +323,6 @@ class PortalGroupAdmin(admin.ModelAdmin):
             ('Permissions', {'fields': ('can_admin', 'can_web_applications',)}),
         )
 
-
     def members_list(self, instance):
         from django.urls import reverse
         html_list = []
@@ -327,10 +332,12 @@ class PortalGroupAdmin(admin.ModelAdmin):
             html_list.append(format_html(
                 '<a href="{}">{}</a>', user_url, user.username))
         return format_html(', '.join(html_list))
+
     members_list.short_description = "Members"
 
     def app_list(self, instance):
         return ', '.join(instance.can_web_applications.all().values_list('name', flat=True))
+
     app_list.short_description = "Can use"
 
 
@@ -351,7 +358,10 @@ def reject(modeladmin, request, queryset):
     for user in queryset:
         if user.reject(request):
             user.save()
+
+
 reject.short_description = "Reject access request for selected users"
+
 
 def merge_users(modeladmin, request, queryset):
     if len(queryset) != 2:
@@ -385,11 +395,14 @@ def merge_users(modeladmin, request, queryset):
     if joined_groups:
         messages.info(request, F"User '{primary.username}' joined the group(s) {joined_groups}")
     if primary.comments == "" or primary.comments is None:
-        if  secondary.comments != "" and secondary.comments is not None:
+        if secondary.comments != "" and secondary.comments is not None:
             primary.comments = secondary.comments
     primary.save()
     secondary.delete()
-    messages.info(request, F"The Users '{primary.username}' and '{secondary.username}' have been merged into '{primary.username}' and '{secondary.username}' has been deleted.")
+    messages.info(request,
+                  F"The Users '{primary.username}' and '{secondary.username}' have been merged into '{primary.username}' and '{secondary.username}' has been deleted.")
+
+
 merge_users.short_description = "Merge two users"
 
 
@@ -414,6 +427,7 @@ class PortalUserAdmin(UserAdmin):
             html_list.append(format_html(
                 '<a href="{}">{}</a>', group_url, group.name))
         return format_html(', '.join(html_list))
+
     portal_group_list.short_description = "Groups"
 
     def get_actions(self, request):
@@ -443,12 +457,14 @@ class PortalUserAdmin(UserAdmin):
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
         messages.warning(
-            request, "KubePortal never deletes namespaces or service accounts in Kubernetes. You must do that manually.")
+            request,
+            "KubePortal never deletes namespaces or service accounts in Kubernetes. You must do that manually.")
 
     def delete_queryset(self, request, queryset):
         super().delete_queryset(request, queryset)
         messages.warning(
-            request, "KubePortal never deletes namespaces or service accounts in Kubernetes. You must do that manually.")
+            request,
+            "KubePortal never deletes namespaces or service accounts in Kubernetes. You must do that manually.")
 
     def render_change_form(self, request, context, *args, **kwargs):
         if 'service_account' in context['adminform'].form.fields:
@@ -459,8 +475,10 @@ class PortalUserAdmin(UserAdmin):
     def get_urls(self):
         urls = super().get_urls()
         # The admin_view() wrapper ensures access protection
-        return [path('<uuid:approval_id>/approve/', self.admin_site.admin_view(self.approve_view), name='access_approve'),
-                path('<uuid:approval_id>/reject/', self.admin_site.admin_view(self.reject_view), name='access_reject')] + urls
+        return [path('<uuid:approval_id>/approve/', self.admin_site.admin_view(self.approve_view),
+                     name='access_approve'),
+                path('<uuid:approval_id>/reject/', self.admin_site.admin_view(self.reject_view),
+                     name='access_reject')] + urls
 
     def approve_view(self, request, approval_id):
         '''

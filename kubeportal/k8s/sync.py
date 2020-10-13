@@ -96,7 +96,7 @@ def _sync_svcaccounts(request):
     try:
         k8s_svca_list = api.get_service_accounts()
     except Exception as e:
-        error_log(request, "Sync failed, error while fetching list of service accounts: {e}.")
+        error_log(request, f"Sync failed, error while fetching list of service accounts: {e}.")
         return
 
     for k8s_svca in k8s_svca_list:
