@@ -11,7 +11,8 @@ from kubeportal.api.serializers import UserSerializer, WebApplicationSerializer,
 from django.conf import settings
 from kubeportal.models.portalgroup import PortalGroup
 from kubeportal.models.webapplication import WebApplication
-from kubeportal.k8s import api as api
+from kubeportal.k8s import api
+
 
 import logging
 

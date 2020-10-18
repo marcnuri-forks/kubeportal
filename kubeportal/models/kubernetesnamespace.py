@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Count
-from kubeportal.k8s import api as api
+from kubeportal.k8s import api
 
 
 class KubernetesNamespace(models.Model):

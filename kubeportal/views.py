@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from kubeportal.models.webapplication import WebApplication
-from .k8s import api as api
+from .k8s import api
 
 import logging
 

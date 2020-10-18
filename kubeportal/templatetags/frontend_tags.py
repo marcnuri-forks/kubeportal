@@ -1,7 +1,7 @@
 from django import template
 from django.conf import settings
 
-from kubeportal.k8s import api as api
+from kubeportal.k8s import api
 
 register = template.Library()
 

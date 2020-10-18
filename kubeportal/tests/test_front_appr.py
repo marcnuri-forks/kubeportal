@@ -98,7 +98,7 @@ class FrontendLoggedInApproved(AdminLoggedInTestCase):
                 self.assertEqual(response.status_code, 401)
 
     def test_subauth_k8s_broken(self):
-        from kubeportal.k8s import api as api
+        from kubeportal.k8s import api
         core_v1_temp, rbac_v1_temp = api.core_v1, api.rbac_v1
         api.core_v1 = None
         api.rbac_v1 = None

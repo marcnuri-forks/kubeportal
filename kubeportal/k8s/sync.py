@@ -17,7 +17,6 @@ from kubeportal.models.kubernetesserviceaccount import KubernetesServiceAccount
 from kubeportal.k8s.utils import load_config, error_log
 from kubeportal.k8s import ns_sync_utils as ns_utils
 from kubeportal.k8s import svca_sync_utils as svca_utils
-from kubeportal.k8s import api as api
 
 import json
 import logging
